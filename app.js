@@ -202,14 +202,16 @@ function renderProgress(){
     $('#satProgress').innerHTML=`<div class="row"><div class="row-main"><strong>${p.sat.current||'—'} → ${p.sat.target||'—'}</strong><small>${gap===null?'Set scores to track progress':gap<=0?'Target reached':`${gap} points remaining`}</small></div><span class="badge">${p.sat.date?fmtDate(p.sat.date):'No date'}</span></div>`;
   }
 }
+// Planner calendar: study time is grouped by day and subject.
+let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let selectedCalendarDate=null;
+const initialTaskDate=$('#taskDate');
+if(initialTaskDate&&!initialTaskDate.value)initialTaskDate.value=new Date().toISOString().slice(0,10);
+
 function renderAll(){renderTasks();renderStudy();renderExams();renderAcademics();renderStudySubjects();renderDashboard();renderProgress();renderCalendar()}
 
 if(!getProfile()) showOnboarding();
 else renderAll();
-
-// Planner calendar: study time is grouped by day and subject.
-let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
-let selectedCalendarDate=null;
 const subjectPalette=['#4f8df7','#9b6df3','#20b875','#14a8b8','#f59e42','#e6b422','#ef6c8f','#64748b'];
 function subjectColorMap(){
   const p=getProfile(); const map={};
@@ -220,7 +222,7 @@ function subjectColorMap(){
 function studyDateKey(x){const d=new Date(x.date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function formatMinutes(m){m=Math.round(m||0);return m>=60?`${Math.floor(m/60)}h${m%60?` ${m%60}m`:''}`:`${m}m`}
 function changeCalendarMonth(delta){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);selectedCalendarDate=null;renderCalendar()}
-function selectCalendarDay(key){selectedCalendarDate=key;renderCalendar()}
+function selectCalendarDay(key){selectedCalendarDate=key;const taskDate=$('#taskDate');if(taskDate)taskDate.value=key;renderCalendar()}
 function renderCalendar(){
   if(!$('#calendarGrid'))return;
   const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
