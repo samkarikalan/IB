@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#0b1220" />
+<title>IB Student Hub</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div id="onboarding" class="onboarding hidden">
+  <div class="setup-wrap">
+    <div class="setup-head">
+      <h1>Set up your student hub</h1>
+      <p>We’ll personalize your IB plan and add SAT if you need it.</p>
+    </div>
+    <div class="step-indicator"><span></span><span></span><span></span><span></span></div>
+
+    <section class="step" data-step="0">
+      <div class="card">
+        <h4>IB programme</h4>
+        <div class="form-grid">
+          <select id="setupYear"><option value="">Choose year</option><option>DP1</option><option>DP2</option></select>
+          <input id="setupExamSession" placeholder="IB exam session, e.g. May 2027">
+        </div>
+      </div>
+    </section>
+
+    <section class="step" data-step="1">
+      <div class="card">
+        <h4>Your 6 IB subjects</h4>
+        <div id="subjectSetup"></div>
+      </div>
+    </section>
+
+    <section class="step" data-step="2">
+      <div class="card">
+        <h4>IB core</h4>
+        <div class="form-grid">
+          <input id="setupEE" placeholder="Extended Essay subject / topic">
+          <select id="setupTOK"><option value="">TOK status</option><option>Not started</option><option>Planning</option><option>In progress</option><option>Drafting</option><option>Complete</option></select>
+          <select id="setupCAS"><option value="">CAS status</option><option>Not started</option><option>In progress</option><option>On track</option><option>Complete</option></select>
+        </div>
+      </div>
+    </section>
+
+    <section class="step" data-step="3">
+      <div class="card">
+        <div class="switch-row">
+          <div><strong>Include SAT</strong><small style="display:block;color:var(--muted);margin-top:4px">Turn on SAT planning, scores and study tracking.</small></div>
+          <input id="setupSATEnabled" class="switch" type="checkbox" onchange="toggleSATSetup()">
+        </div>
+        <div id="satSetupFields" class="form-grid" style="margin-top:12px;display:none">
+          <input id="setupSATDate" type="date">
+          <div class="two"><input id="setupSATCurrent" type="number" min="400" max="1600" step="10" placeholder="Current score"><input id="setupSATTarget" type="number" min="400" max="1600" step="10" placeholder="Target score"></div>
+          <div class="two"><input id="setupSATMath" type="number" min="200" max="800" step="10" placeholder="Math"><input id="setupSATRW" type="number" min="200" max="800" step="10" placeholder="Reading & Writing"></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="setup-actions">
+      <button id="prevStep" class="btn secondary" onclick="changeSetupStep(-1)">Back</button>
+      <button id="nextStep" class="btn" onclick="changeSetupStep(1)">Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+<header>
+  <div class="brand"><h1>IB Student Hub</h1><p id="profileLine">Plan • Study • Track • Achieve</p></div>
+  <div class="avatar">IB</div>
+</header>
+
+<main>
+<section id="home" class="panel active">
+  <div class="hero">
+    <div class="hero-top">
+      <div><h2 id="heroTitle">Your dashboard</h2><p id="heroSub">Stay focused on what matters most today.</p></div>
+      <div class="score" id="heroScore">—</div>
+    </div>
+    <div class="progress"><span id="heroProgress" style="width:0%"></span></div>
+    <div class="hero-foot"><span id="heroFootLeft">Weekly goals</span><span id="heroFootRight">0 / 0 completed</span></div>
+  </div>
+
+  <div class="section-title"><h3>Today</h3><button onclick="openPanel('planner')">View plan</button></div>
+  <div class="card" id="todayCard"><div class="empty">Add tasks to start your daily plan.</div></div>
+
+  <div class="section-title"><h3>Your tools</h3></div>
+  <div class="grid">
+    <button class="tile" onclick="openPanel('planner')"><div class="icon">🗓️</div><strong>Planner</strong><small>Tasks, deadlines & weekly goals</small></button>
+    <button class="tile" onclick="openPanel('study')"><div class="icon">📚</div><strong>Study</strong><small>Sessions, topics & revision tracking</small></button>
+    <button class="tile" onclick="openPanel('academics')"><div class="icon">🎓</div><strong>Academics</strong><small>IB subjects, exams, marks & SAT</small></button>
+    <button class="tile" onclick="openPanel('essays')"><div class="icon">✍️</div><strong>Essays</strong><small>EE, IA, TOK & coursework</small></button>
+    <button class="tile" onclick="openPanel('progress')"><div class="icon">🎯</div><strong>Progress</strong><small>Goals, streaks & achievements</small></button>
+    <button class="tile" onclick="editProfile()"><div class="icon">⚙️</div><strong>Student setup</strong><small>Subjects, IB core & SAT settings</small></button>
+  </div>
+</section>
+
+<section id="planner" class="panel">
+  <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Planner</h2></div>
+  <div class="card">
+    <h4>Add task</h4>
+    <div class="form-grid">
+      <input id="taskTitle" placeholder="Task title">
+      <div class="two"><input id="taskDate" type="date"><select id="taskType"><option>Study</option><option>Essay</option><option>Exam</option><option>CAS</option><option>SAT</option><option>Other</option></select></div>
+      <button class="btn" onclick="addTask()">Add to plan</button>
+    </div>
+  </div>
+  <div class="card"><h4>Upcoming</h4><div id="taskList"></div></div>
+</section>
+
+<section id="study" class="panel">
+  <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Study</h2></div>
+  <div class="card">
+    <h4>Log a study session</h4>
+    <div class="form-grid">
+      <select id="studySubject"></select>
+      <input id="studyTopic" placeholder="Topic">
+      <div class="two"><input id="studyMinutes" type="number" min="5" step="5" value="45"><button class="btn" onclick="logStudy()">Log session</button></div>
+    </div>
+  </div>
+  <div class="card"><h4>Recent study</h4><div id="studyList"></div></div>
+</section>
+
+<section id="academics" class="panel">
+  <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Academics</h2></div>
+  <div class="tabs">
+    <button class="active" onclick="showAcademicTab('ib',this)">IB</button>
+    <button onclick="showAcademicTab('exams',this)">Exams</button>
+    <button onclick="showAcademicTab('marks',this)">Marks</button>
+    <button id="satTabButton" onclick="showAcademicTab('sat',this)">SAT</button>
+  </div>
+
+  <div id="academic-ib">
+    <div class="card"><h4>Your IB subjects</h4><div id="ibSubjectList"></div></div>
+    <div class="card"><h4>IB core</h4><div id="ibCoreSummary"></div></div>
+  </div>
+
+  <div id="academic-exams" style="display:none">
+    <div class="card">
+      <h4>Add exam</h4>
+      <div class="form-grid">
+        <input id="examName" placeholder="Subject / paper"><input id="examDate" type="date"><button class="btn" onclick="addExam()">Add exam</button>
+      </div>
+    </div>
+    <div class="card"><h4>Exam schedule</h4><div id="examList"></div></div>
+  </div>
+
+  <div id="academic-marks" style="display:none">
+    <div class="card"><h4>Subject marks</h4><div id="marksList"></div></div>
+  </div>
+
+  <div id="academic-sat" style="display:none">
+    <div id="satContent"></div>
+  </div>
+</section>
+
+<section id="essays" class="panel">
+  <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Essays & coursework</h2></div>
+  <div class="card">
+    <div class="essay"><strong>Extended Essay</strong><small id="eeLabel">Not set</small><div class="progress" style="background:#edf0f6"><span style="width:15%;background:var(--accent)"></span></div></div>
+    <div class="essay"><strong>TOK</strong><small id="tokLabel">Not set</small><div class="progress" style="background:#edf0f6"><span style="width:10%;background:var(--accent)"></span></div></div>
+    <div class="essay"><strong>Internal Assessments</strong><small>Track each subject IA here in the next version.</small></div>
+  </div>
+</section>
+
+<section id="progress" class="panel">
+  <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Progress</h2></div>
+  <div class="card"><h4>This week</h4><div id="weeklyProgress"></div></div>
+  <div class="card"><h4>IB core</h4><div id="coreProgress"></div></div>
+  <div id="satProgressCard" class="card"><h4>SAT</h4><div id="satProgress"></div></div>
+</section>
+</main>
+
+<nav>
+  <button class="active" data-tab="home" onclick="openPanel('home')"><span>⌂</span>Home</button>
+  <button data-tab="planner" onclick="openPanel('planner')"><span>✓</span>Plan</button>
+  <button data-tab="study" onclick="openPanel('study')"><span>◉</span>Study</button>
+  <button data-tab="academics" onclick="openPanel('academics')"><span>▦</span>Academics</button>
+  <button data-tab="progress" onclick="openPanel('progress')"><span>★</span>Progress</button>
+</nav>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
