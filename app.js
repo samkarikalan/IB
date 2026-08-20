@@ -113,7 +113,7 @@ function logStudy(){
   const subject=$('#studySubject').value,topic=$('#studyTopic').value.trim(),minutes=Number($('#studyMinutes').value||0);
   if(!topic||minutes<=0)return;
   const logs=store.get('ib_study');logs.unshift({id:Date.now(),subject,topic,minutes,date:new Date().toISOString()});store.set('ib_study',logs.slice(0,50));
-  $('#studyTopic').value='';renderStudy();renderProgress();
+  $('#studyTopic').value='';renderStudy();renderProgress();renderCalendar();
 }
 function renderStudy(){
   const logs=store.get('ib_study');
@@ -202,7 +202,45 @@ function renderProgress(){
     $('#satProgress').innerHTML=`<div class="row"><div class="row-main"><strong>${p.sat.current||'—'} → ${p.sat.target||'—'}</strong><small>${gap===null?'Set scores to track progress':gap<=0?'Target reached':`${gap} points remaining`}</small></div><span class="badge">${p.sat.date?fmtDate(p.sat.date):'No date'}</span></div>`;
   }
 }
-function renderAll(){renderTasks();renderStudy();renderExams();renderAcademics();renderStudySubjects();renderDashboard();renderProgress()}
+function renderAll(){renderTasks();renderStudy();renderExams();renderAcademics();renderStudySubjects();renderDashboard();renderProgress();renderCalendar()}
 
 if(!getProfile()) showOnboarding();
 else renderAll();
+
+// Planner calendar: study time is grouped by day and subject.
+let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
+let selectedCalendarDate=null;
+const subjectPalette=['#4f8df7','#9b6df3','#20b875','#14a8b8','#f59e42','#e6b422','#ef6c8f','#64748b'];
+function subjectColorMap(){
+  const p=getProfile(); const map={};
+  (p?.subjects||[]).forEach((s,i)=>{map[`${s.name} ${s.level}`]=subjectPalette[i%subjectPalette.length];map[s.name]=subjectPalette[i%subjectPalette.length]});
+  if(p?.sat?.enabled){map['SAT Math']='#3b82f6';map['SAT Reading & Writing']='#f97316'}
+  return map;
+}
+function studyDateKey(x){const d=new Date(x.date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function formatMinutes(m){m=Math.round(m||0);return m>=60?`${Math.floor(m/60)}h${m%60?` ${m%60}m`:''}`:`${m}m`}
+function changeCalendarMonth(delta){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+delta,1);selectedCalendarDate=null;renderCalendar()}
+function selectCalendarDay(key){selectedCalendarDate=key;renderCalendar()}
+function renderCalendar(){
+  if(!$('#calendarGrid'))return;
+  const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth();
+  $('#calendarMonth').textContent=calendarCursor.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  const logs=store.get('ib_study'), colors=subjectColorMap();
+  const monthLogs=logs.filter(x=>{const d=new Date(x.date);return d.getFullYear()===y&&d.getMonth()===m});
+  const byDay={}, bySubject={}; let total=0;
+  monthLogs.forEach(x=>{const key=studyDateKey(x);(byDay[key]??=[]).push(x);bySubject[x.subject]=(bySubject[x.subject]||0)+x.minutes;total+=x.minutes});
+  const first=new Date(y,m,1).getDay(),days=new Date(y,m+1,0).getDate();
+  const now=new Date(),today=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  let html='';for(let i=0;i<first;i++)html+='<div class="calendar-day empty"></div>';
+  for(let d=1;d<=days;d++){
+    const key=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`, dayLogs=byDay[key]||[], mins=dayLogs.reduce((a,b)=>a+b.minutes,0);
+    const subjects=[...new Set(dayLogs.map(x=>x.subject))];
+    html+=`<button class="calendar-day ${key===today?'today ':''}${key===selectedCalendarDate?'selected':''}" onclick="selectCalendarDay('${key}')"><span class="day-number">${d}</span>${mins?`<span class="day-hours">${formatMinutes(mins)}</span>`:''}<span class="calendar-dots">${subjects.slice(0,4).map(s=>`<i style="background:${colors[s]||'#64748b'}"></i>`).join('')}</span></button>`;
+  }
+  $('#calendarGrid').innerHTML=html;
+  $('#calendarSummary').innerHTML=`<div><small>Study hours</small><strong>${formatMinutes(total)}</strong></div><div><small>Subjects studied</small><strong>${Object.keys(bySubject).length}</strong></div>`;
+  $('#subjectLegend').innerHTML=Object.entries(bySubject).sort((a,b)=>b[1]-a[1]).map(([s,mins])=>`<span class="legend-item"><i style="background:${colors[s]||'#64748b'}"></i>${s.replace(/ (HL|SL)$/,'')} · ${formatMinutes(mins)}</span>`).join('');
+  const detailKey=selectedCalendarDate||today, detailLogs=byDay[detailKey]||[];
+  const detailSubjects={};detailLogs.forEach(x=>detailSubjects[x.subject]=(detailSubjects[x.subject]||0)+x.minutes);
+  $('#calendarDayDetail').innerHTML=detailLogs.length?`<div class="day-detail-title">${fmtDate(detailKey)}</div>${Object.entries(detailSubjects).map(([s,mins])=>`<div class="day-study-row"><span><i style="background:${colors[s]||'#64748b'}"></i>${s.replace(/ (HL|SL)$/,'')}</span><strong>${formatMinutes(mins)}</strong></div>`).join('')}`:'';
+}

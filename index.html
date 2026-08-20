@@ -4,8 +4,13 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <meta name="theme-color" content="#0b1220" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="IB Student Hub" />
 <title>IB Student Hub</title>
-<link rel="stylesheet" href="styles.css" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="stylesheet" href="styles.css?v=20260820-1" />
 </head>
 <body>
 
@@ -99,6 +104,14 @@
 
 <section id="planner" class="panel">
   <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Planner</h2></div>
+  <div class="card calendar-card">
+    <div class="calendar-head"><button class="calendar-nav" onclick="changeCalendarMonth(-1)">‹</button><h3 id="calendarMonth"></h3><button class="calendar-nav" onclick="changeCalendarMonth(1)">›</button></div>
+    <div class="calendar-week"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+    <div id="calendarGrid" class="calendar-grid"></div>
+    <div id="calendarSummary" class="calendar-summary"></div>
+    <div id="subjectLegend" class="subject-legend"></div>
+    <div id="calendarDayDetail" class="calendar-day-detail"></div>
+  </div>
   <div class="card">
     <h4>Add task</h4>
     <div class="form-grid">
@@ -182,6 +195,26 @@
 </nav>
 </div>
 
-<script src="app.js"></script>
+<script src="app.js?v=20260820-1"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' });
+      // Check for a newer deployed service worker on every app launch.
+      registration.update().catch(() => {});
+
+      let reloadingForUpdate = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (reloadingForUpdate) return;
+        reloadingForUpdate = true;
+        window.location.reload();
+      });
+    } catch (error) {
+      console.warn('Service worker registration failed:', error);
+    }
+  });
+}
+</script>
 </body>
 </html>

@@ -28,3 +28,6 @@ Later, the storage layer can be replaced with Supabase for:
 ## Run locally
 
 Open `index.html` directly, or serve the folder with any static web server.
+
+## PWA update support
+This build includes `manifest.webmanifest`, `sw.js`, and 192/512 app icons. The service worker uses a versioned cache, prefers the network for the app shell, removes older app caches on activation, and checks for a newer service worker on every launch. For each future production release, bump `CACHE_VERSION` in `sw.js` and the `?v=` values for `app.js` / `styles.css` in `index.html` and `sw.js`.

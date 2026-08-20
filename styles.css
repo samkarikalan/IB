@@ -79,3 +79,30 @@
   nav button span{display:block;font-size:1.12rem;margin-bottom:2px}
   nav button.active{color:var(--accent);font-weight:800}
   @media(min-width:680px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+/* Planner study calendar */
+.calendar-card{padding:16px 14px}
+.calendar-head{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;margin-bottom:14px}
+.calendar-head h3{text-align:center;margin:0;font-size:1.08rem}
+.calendar-nav{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:#f7f9fd;color:var(--text);font-size:1.5rem;font-weight:700}
+.calendar-week,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
+.calendar-week span{text-align:center;color:var(--muted);font-size:.72rem;font-weight:800;padding:4px 0 9px}
+.calendar-day{position:relative;min-height:64px;border:0;background:transparent;color:var(--text);padding:7px 2px 4px;border-radius:13px;text-align:center}
+.calendar-day.empty{min-height:64px;padding:0}
+.calendar-day .day-number{display:grid;place-items:center;width:27px;height:27px;margin:0 auto;font-size:.82rem;font-weight:700;border-radius:50%}
+.calendar-day.today .day-number{background:var(--accent);color:#fff}
+.calendar-day.selected{background:var(--accent-soft)}
+.calendar-day .day-hours{display:block;font-size:.69rem;font-weight:800;margin-top:2px;color:var(--good);white-space:nowrap}
+.calendar-dots{height:7px;display:flex;justify-content:center;align-items:center;gap:2px;margin-top:2px}
+.calendar-dots i{display:block;width:5px;height:5px;border-radius:50%}
+.calendar-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;padding:13px 8px;border:1px solid var(--line);border-radius:16px;background:#f7f9fd;text-align:center}
+.calendar-summary small{display:block;color:var(--muted);font-size:.69rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.calendar-summary strong{display:block;margin-top:4px;font-size:1.05rem}
+.subject-legend{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:12px}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.72rem}
+.legend-item i{width:8px;height:8px;border-radius:50%;display:block}
+.calendar-day-detail{margin-top:12px}
+.day-detail-title{font-size:.78rem;color:var(--muted);font-weight:800;margin-bottom:5px}
+.day-study-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.8rem}
+.day-study-row span{display:flex;align-items:center;gap:7px}.day-study-row i{width:8px;height:8px;border-radius:50%;display:block}
+@media(max-width:390px){.calendar-day{min-height:58px}.calendar-day .day-hours{font-size:.62rem}.calendar-card{padding-left:10px;padding-right:10px}}
