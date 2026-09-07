@@ -10,7 +10,7 @@
 <title>IB Student Hub</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
-<link rel="stylesheet" href="styles.css?v=20260820-2" />
+<link rel="stylesheet" href="styles.css?v=20260907-1" />
 </head>
 <body>
 
@@ -74,34 +74,33 @@
 <div class="app">
 <header>
   <div class="brand"><h1>IB Student Hub</h1><p id="profileLine">Plan • Study • Track • Achieve</p></div>
-  <div class="avatar">IB</div>
+  <button class="home-menu-btn" aria-label="Open tools menu" onclick="toggleHomeMenu(true)">+</button>
 </header>
 
 <main>
 <section id="home" class="panel active">
-  <div class="hero">
-    <div class="hero-top">
-      <div><h2 id="heroTitle">Your dashboard</h2><p id="heroSub">Stay focused on what matters most today.</p></div>
-      <div class="score" id="heroScore">—</div>
-    </div>
-    <div class="progress"><span id="heroProgress" style="width:0%"></span></div>
-    <div class="hero-foot"><span id="heroFootLeft">Weekly goals</span><span id="heroFootRight">0 / 0 completed</span></div>
-  </div>
+  <details class="home-summary-card" open>
+    <summary><span>Upcoming</span><span class="collapse-chevron">⌄</span></summary>
+    <div class="summary-body" id="todayCard"><div class="empty">Add tasks to start your daily plan.</div></div>
+  </details>
 
-  <div class="section-title"><h3>Today</h3><button onclick="openPanel('planner')">View plan</button></div>
-  <div class="card" id="todayCard"><div class="empty">Add tasks to start your daily plan.</div></div>
-
-  <div class="section-title"><h3>Your tools</h3></div>
-  <div class="grid">
-    <button class="tile" onclick="openPanel('planner')"><div class="icon">🗓️</div><strong>Planner</strong><small>Tasks, deadlines & weekly goals</small></button>
-    <button class="tile" onclick="openPanel('study')"><div class="icon">📚</div><strong>Study</strong><small>Sessions, topics & revision tracking</small></button>
-    <button class="tile" onclick="openPanel('academics')"><div class="icon">🎓</div><strong>Academics</strong><small>IB subjects, exams, marks & SAT</small></button>
-    <button class="tile" onclick="openPanel('essays')"><div class="icon">✍️</div><strong>Essays</strong><small>EE, IA, TOK & coursework</small></button>
-    <button class="tile" onclick="openPanel('progress')"><div class="icon">🎯</div><strong>Progress</strong><small>Goals, streaks & achievements</small></button>
-    <button class="tile" onclick="editProfile()"><div class="icon">⚙️</div><strong>Student setup</strong><small>Subjects, IB core & SAT settings</small></button>
-  </div>
+  <details class="home-summary-card" open>
+    <summary><span>Progress</span><span class="collapse-chevron">⌄</span></summary>
+    <div class="summary-body" id="homeProgressCard"></div>
+  </details>
 </section>
 
+<div id="homeMenu" class="home-menu-overlay" onclick="closeHomeMenuFromBackdrop(event)">
+  <div class="home-menu-sheet" role="dialog" aria-modal="true" aria-label="Student tools">
+    <button onclick="openHomeTool('planner')"><span>🗓️</span>Planner</button>
+    <button onclick="openHomeTool('study')"><span>📚</span>Study</button>
+    <button onclick="openHomeTool('academics')"><span>🎓</span>Academics</button>
+    <button onclick="openHomeTool('essays')"><span>✍️</span>Essays</button>
+    <button onclick="openHomeTool('progress')"><span>🎯</span>Progress</button>
+    <button onclick="toggleHomeMenu(false);editProfile()"><span>⚙️</span>Student setup</button>
+    <button class="menu-cancel" onclick="toggleHomeMenu(false)">Cancel</button>
+  </div>
+</div>
 <section id="planner" class="panel">
   <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Planner</h2></div>
   <div class="card calendar-card">
@@ -195,7 +194,7 @@
 </nav>
 </div>
 
-<script src="app.js?v=20260820-2"></script>
+<script src="app.js?v=20260907-1"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {

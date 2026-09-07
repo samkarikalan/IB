@@ -74,6 +74,13 @@ function saveProfile(){
   $('#onboarding').classList.add('hidden');
   renderAll();
 }
+function toggleHomeMenu(show){
+  const menu=$('#homeMenu'); if(!menu)return;
+  menu.classList.toggle('open',!!show);
+  document.body.style.overflow=show?'hidden':'';
+}
+function closeHomeMenuFromBackdrop(event){if(event.target?.id==='homeMenu')toggleHomeMenu(false)}
+function openHomeTool(id){toggleHomeMenu(false);openPanel(id)}
 function openPanel(id){
   $$('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -170,14 +177,14 @@ function renderSAT(){
 function renderDashboard(){
   const p=getProfile(); if(!p)return;
   $('#profileLine').textContent=`${p.year}${p.examSession?' • '+p.examSession:''}${p.sat?.enabled?' • IB + SAT':''}`;
-  $('#heroTitle').textContent=`${p.year} dashboard`;
   const tasks=store.get('ib_tasks'), done=tasks.filter(t=>t.done).length, pct=tasks.length?Math.round(done/tasks.length*100):0;
-  $('#heroScore').textContent=tasks.length?pct+'%':'—';
-  $('#heroProgress').style.width=pct+'%';
-  $('#heroFootRight').textContent=`${done} / ${tasks.length} completed`;
   const today=new Date().toISOString().slice(0,10);
   const upcoming=tasks.filter(t=>!t.done).sort((a,b)=>(a.date||'9999').localeCompare(b.date||'9999')).slice(0,3);
-  $('#todayCard').innerHTML=upcoming.length?upcoming.map(t=>`<div class="row"><div class="row-main"><strong>${t.title}</strong><small>${t.type} • ${t.date===today?'Today':fmtDate(t.date)}</small></div><span class="badge ${t.date===today?'warn':''}">${t.type}</span></div>`).join(''):'<div class="empty">Add tasks to start your daily plan.</div>';
+  $('#todayCard').innerHTML=upcoming.length?upcoming.map(t=>`<div class="row"><div class="row-main"><strong>${t.title}</strong><small>${t.type} • ${t.date===today?'Today':fmtDate(t.date)}</small></div><span class="badge ${t.date===today?'warn':''}">${t.type}</span></div>`).join(''):'<div class="empty">No upcoming items yet.</div>';
+  const logs=store.get('ib_study'), weekAgo=Date.now()-7*86400000;
+  const weekMins=logs.filter(x=>new Date(x.date).getTime()>=weekAgo).reduce((a,b)=>a+b.minutes,0);
+  const progress=$('#homeProgressCard');
+  if(progress)progress.innerHTML=`<div class="row"><div class="row-main"><strong>Weekly study</strong><small>Last 7 days</small></div><span class="badge good">${Math.floor(weekMins/60)}h ${weekMins%60}m</span></div><div class="row"><div class="row-main"><strong>Tasks completed</strong><small>Overall progress</small></div><span class="badge">${done} / ${tasks.length}</span></div>`;
 }
 function renderStudySubjects(){
   const p=getProfile(); if(!p)return;

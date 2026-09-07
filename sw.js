@@ -1,12 +1,12 @@
 // IB Student Hub service worker
 // IMPORTANT: bump CACHE_VERSION for every production release.
-const CACHE_VERSION = 'ib-student-hub-20260820-2';
+const CACHE_VERSION = 'ib-student-hub-20260907-1';
 const CACHE_NAME = `ib-student-hub-${CACHE_VERSION}`;
 const APP_SHELL = [
   './',
   './index.html',
-  './styles.css?v=20260820-2',
-  './app.js?v=20260820-2',
+  './styles.css?v=20260907-1',
+  './app.js?v=20260907-1',
   './manifest.webmanifest',
   './icons/icon-192.png',
   './icons/icon-512.png'

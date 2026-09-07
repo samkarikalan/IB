@@ -106,3 +106,19 @@
 .day-study-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.8rem}
 .day-study-row span{display:flex;align-items:center;gap:7px}.day-study-row i{width:8px;height:8px;border-radius:50%;display:block}
 @media(max-width:390px){.calendar-day{min-height:58px}.calendar-day .day-hours{font-size:.62rem}.calendar-card{padding-left:10px;padding-right:10px}}
+
+/* Home: summary-only dashboard + tools menu */
+.home-menu-btn{width:44px;height:44px;border:0;border-radius:50%;background:var(--text);color:#fff;font-size:2rem;font-weight:300;line-height:1;display:grid;place-items:center;padding:0}
+.home-summary-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px;overflow:hidden}
+.home-summary-card summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:18px;font-size:1.05rem;font-weight:800;cursor:pointer}
+.home-summary-card summary::-webkit-details-marker{display:none}
+.collapse-chevron{font-size:1.25rem;color:var(--muted);transition:transform .18s ease}
+.home-summary-card:not([open]) .collapse-chevron{transform:rotate(-90deg)}
+.summary-body{padding:0 18px 8px}
+.summary-body .row:first-child{border-top:1px solid var(--line)}
+.home-menu-overlay{position:fixed;inset:0;background:rgba(7,12,22,.42);backdrop-filter:blur(8px);z-index:100;display:none;align-items:flex-end;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+.home-menu-overlay.open{display:flex}
+.home-menu-sheet{width:min(520px,100%);background:rgba(245,247,251,.96);border-radius:28px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.home-menu-sheet button{width:100%;border:0;background:var(--card);color:var(--text);padding:16px 18px;margin:6px 0;border-radius:18px;font-weight:750;font-size:1rem;text-align:left;display:flex;align-items:center;gap:12px}
+.home-menu-sheet button span{width:28px;text-align:center;font-size:1.2rem}
+.home-menu-sheet .menu-cancel{justify-content:center;text-align:center;margin-top:10px}
