@@ -191,24 +191,50 @@ function renderStudySubjects(){
   const opts=p.subjects.map(s=>`<option>${s.name} ${s.level}</option>`).join('')+(p.sat?.enabled?'<option>SAT Math</option><option>SAT Reading & Writing</option>':'');
   $('#studySubject').innerHTML=opts;
 }
+let progressMode='study', progressPeriod='week';
+function setProgressMode(mode,btn){
+  progressMode=mode;
+  $$('.progress-mode-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.progressMode===mode));
+  $('#progressPeriodTabs').style.display=mode==='study'?'grid':'none';
+  renderProgress();
+}
+function setProgressPeriod(period,btn){
+  progressPeriod=period;
+  $$('.progress-period-tabs button').forEach(b=>b.classList.toggle('active',b.dataset.period===period));
+  renderProgress();
+}
+function progressRange(period){
+  const now=new Date(), start=new Date(now), end=new Date(now);
+  start.setHours(0,0,0,0); end.setHours(23,59,59,999);
+  if(period==='yesterday'){start.setDate(start.getDate()-1);end.setDate(end.getDate()-1)}
+  if(period==='week'){start.setDate(start.getDate()-6)}
+  if(period==='month'){start.setDate(1)}
+  return [start,end];
+}
+function formatStudyMinutes(m){return m>=60?`${Math.floor(m/60)}h ${m%60?m%60+'m':''}`.trim():`${m}m`}
+function subjectStudyMinutes(subject,period){
+  const [a,b]=progressRange(period);
+  return store.get('ib_study').filter(x=>x.subject===subject&&new Date(x.date)>=a&&new Date(x.date)<=b).reduce((n,x)=>n+Number(x.minutes||0),0);
+}
 function renderProgress(){
   const p=getProfile(); if(!p)return;
-  const logs=store.get('ib_study');
-  const weekAgo=Date.now()-7*86400000;
-  const weekMins=logs.filter(x=>new Date(x.date).getTime()>=weekAgo).reduce((a,b)=>a+b.minutes,0);
-  const tasks=store.get('ib_tasks'),done=tasks.filter(t=>t.done).length;
-  $('#weeklyProgress').innerHTML=`
-    <div class="row"><div class="row-main"><strong>Study time</strong><small>Last 7 days</small></div><span class="badge good">${Math.floor(weekMins/60)}h ${weekMins%60}m</span></div>
-    <div class="row"><div class="row-main"><strong>Tasks completed</strong><small>All planned work</small></div><span class="badge">${done} / ${tasks.length}</span></div>`;
-  $('#coreProgress').innerHTML=`
-    <div class="row"><div class="row-main"><strong>CAS</strong><small>${p.cas||'Not set'}</small></div><span class="badge good">${p.cas||'—'}</span></div>
-    <div class="row"><div class="row-main"><strong>Extended Essay</strong><small>${p.ee||'Not set'}</small></div><span class="badge">EE</span></div>
-    <div class="row"><div class="row-main"><strong>TOK</strong><small>${p.tok||'Not set'}</small></div><span class="badge">${p.tok||'—'}</span></div>`;
-  if(p.sat?.enabled){
-    const gap=(p.sat.target&&p.sat.current)?p.sat.target-p.sat.current:null;
-    $('#satProgress').innerHTML=`<div class="row"><div class="row-main"><strong>${p.sat.current||'—'} → ${p.sat.target||'—'}</strong><small>${gap===null?'Set scores to track progress':gap<=0?'Target reached':`${gap} points remaining`}</small></div><span class="badge">${p.sat.date?fmtDate(p.sat.date):'No date'}</span></div>`;
+  const box=$('#subjectProgressDashboard'); if(!box)return;
+  if(progressMode==='study'){
+    const rows=p.subjects.map(s=>({...s,minutes:subjectStudyMinutes(s.name,progressPeriod)})).sort((a,b)=>b.minutes-a.minutes);
+    const total=rows.reduce((n,s)=>n+s.minutes,0), label={today:'today',yesterday:'yesterday',week:'last 7 days',month:'this month'}[progressPeriod];
+    box.innerHTML=`<div class="progress-hero"><small>study time</small><strong>${formatStudyMinutes(total)}</strong><span>${label}</span></div><div class="subject-progress-list">${rows.map((s,i)=>`<div class="subject-progress-row"><div class="subject-rank">${i+1}</div><div class="subject-progress-main"><strong>${s.name} ${s.level}</strong><small>${total?Math.round(s.minutes/total*100):0}% of study time</small></div><div class="subject-progress-value">${formatStudyMinutes(s.minutes)}</div></div>`).join('')}</div>`;
+    return;
   }
+  if(progressMode==='marks'){
+    const valid=p.subjects.filter(s=>s.current), total=valid.reduce((n,s)=>n+Number(s.current||0),0);
+    box.innerHTML=`<div class="progress-hero"><small>current IB subject total</small><strong>${total} / 42</strong><span>${valid.length<6?'Add current grades in Student setup':'Across 6 subjects'}</span></div><div class="subject-progress-list">${p.subjects.map((s,i)=>{const gap=s.current&&s.target?s.target-s.current:null;return `<div class="subject-progress-row"><div class="subject-rank">${i+1}</div><div class="subject-progress-main"><strong>${s.name} ${s.level}</strong><small>Target ${s.target||'—'}${gap>0?` · ${gap} grade${gap>1?'s':''} to target`:gap===0?' · Target reached':''}</small></div><div class="subject-progress-value">${s.current||'—'}<small>/ 7</small></div></div>`}).join('')}</div>`;
+    return;
+  }
+  const ranked=p.subjects.map(s=>{const gap=(s.target||0)-(s.current||0),mins=subjectStudyMinutes(s.name,'month');return {...s,gap,mins}}).sort((a,b)=>b.gap-a.gap||a.mins-b.mins);
+  const needing=ranked.filter(s=>s.gap>0).length;
+  box.innerHTML=`<div class="progress-hero"><small>subjects needing attention</small><strong>${needing}</strong><span>Based on current grade, target and study time</span></div><div class="subject-progress-list">${ranked.map((s,i)=>{const cls=s.gap>=2?'priority-high':s.gap===1?'priority-mid':'priority-good';let advice;if(!s.current||!s.target)advice='Set current and target grades first';else if(s.gap<=0)advice='On target · keep your study rhythm';else if(s.mins<60)advice='Priority: add focused study time this month';else advice=`${s.gap} grade${s.gap>1?'s':''} to target · review weakest topics and past-paper errors`;return `<div class="subject-progress-row"><div class="subject-rank">${i+1}</div><div class="subject-progress-main"><strong><i class="improve-priority ${cls}"></i>${s.name} ${s.level}</strong><small>${advice}</small></div><div class="subject-progress-value">${s.current||'—'} → ${s.target||'—'}<small>${formatStudyMinutes(s.mins)} month</small></div></div>`}).join('')}</div>`;
 }
+
 // Planner calendar: study time is grouped by day and subject.
 let calendarCursor=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 let selectedCalendarDate=null;

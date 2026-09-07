@@ -10,7 +10,7 @@
 <title>IB Student Hub</title>
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icons/icon-192.png" />
-<link rel="stylesheet" href="styles.css?v=20260907-2" />
+<link rel="stylesheet" href="styles.css?v=20260907-3" />
 </head>
 <body>
 
@@ -179,9 +179,18 @@
 
 <section id="progress" class="panel">
   <div class="topbar"><button class="back" onclick="openPanel('home')">‹</button><h2>Progress</h2></div>
-  <div class="card"><h4>This week</h4><div id="weeklyProgress"></div></div>
-  <div class="card"><h4>IB core</h4><div id="coreProgress"></div></div>
-  <div id="satProgressCard" class="card"><h4>SAT</h4><div id="satProgress"></div></div>
+  <div class="progress-mode-tabs">
+    <button class="active" data-progress-mode="study" onclick="setProgressMode('study',this)">Study</button>
+    <button data-progress-mode="marks" onclick="setProgressMode('marks',this)">Marks</button>
+    <button data-progress-mode="improve" onclick="setProgressMode('improve',this)">Improve</button>
+  </div>
+  <div id="progressPeriodTabs" class="progress-period-tabs">
+    <button data-period="today" onclick="setProgressPeriod('today',this)">Today</button>
+    <button data-period="yesterday" onclick="setProgressPeriod('yesterday',this)">Yesterday</button>
+    <button class="active" data-period="week" onclick="setProgressPeriod('week',this)">Week</button>
+    <button data-period="month" onclick="setProgressPeriod('month',this)">Month</button>
+  </div>
+  <div id="subjectProgressDashboard"></div>
 </section>
 </main>
 
@@ -194,7 +203,7 @@
 </nav>
 </div>
 
-<script src="app.js?v=20260907-2"></script>
+<script src="app.js?v=20260907-3"></script>
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
